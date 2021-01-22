@@ -1,8 +1,7 @@
 # Task Tracker
 
-tracking varies tasks or projects and generates reports of everyday
+Tracnking timer for tasks and projects. Save logs into a csv file
 
 To-do:
-1. add a file system that records date, activities and time spend of each
-2. pie charts for report
-3. adding a pull-down button for task logs section
+1. pie charts for report
+2. adding a pull-down button for an anlysis section
