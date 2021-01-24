@@ -17,7 +17,7 @@ def updatewatch():
 	string = time.strftime("%H:%M:%S",time.gmtime(delta))
 	watch['text'] = string
 	if runtask:
-		watch.after(1000, updatewatch)
+		watch.after(300, updatewatch)
 
 def start(t):
 	global startstamp, runtask
@@ -26,14 +26,15 @@ def start(t):
 	starttime = time.strftime("%m/%d/%y %H:%M", time.localtime(startstamp))
 	runtask = t
 
-	tasklogs['state'] = 'normal'
 	tasklogs.insert(tk.END, t+': '+starttime+' ~ ')
-	tasklogs['state'] = 'disable'
 
-	for t in tasks:
-		t.btn['state'] = "disable"
-	stop_btn['state'] = "normal"
-	save_btn['state'] = 'disable'
+	for task in tasks:
+		if task.name == runtask:
+			task.btn['text'] = 'stop'
+			task.btn['command'] = stop
+		else:
+			task.btn['state'] = "disable"
+	report_btn['state'] = 'disable'
 
 	updatewatch()
 
@@ -49,16 +50,15 @@ def stop():
 	span = time.strftime("%H:%M", time.gmtime(tspan))
 	totalspan += tspan
 
-	tasklogs['state'] = 'normal'
 	tasklogs.insert(tk.END, endtime+'  '+span+'\n')
-	tasklogs['state']="disable"
 
-	for t in tasks:
-		if t.name == temptask:
-			t.span = tspan
-		t.btn['state'] = "normal"
-		stop_btn['state'] = "disable"
-		save_btn['state'] = 'normal'
+	for task in tasks:
+		if task.name == temptask:
+			task.span = tspan
+			task.btn['text'] = task.name
+			task.btn['command'] = command = lambda t=t: start(t.name)
+		task.btn['state'] = "normal"
+	report_btn['state'] = 'normal'
 
 	updatepie()
 
@@ -69,6 +69,13 @@ def save():
 	tasklogs.insert(tk.END, 'log saved at ''logs.csv''\n')
 	tasklogs['state']="disable"
 
+def report():
+	tasklogs['state']="disable"
+	reportwindow.deiconify()
+
+def close():
+	reportwindow.withdraw()
+
 def updatepie():
 	lastend = 0
 	for task in tasks:
@@ -77,40 +84,57 @@ def updatepie():
 		lastend += extent
 
 if __name__ == '__main__':
+#initializing data log file and tasks
 	loghandler.initlogs(fname)
 	tasks = taskclass.initTasks(tasknames, taskcolors)
 
+#main window
 	window = tk.Tk()
 	window.title("Task Tracker")
 
-	window.minsize(width = 450, height = 630)
+	window.minsize(width = 350, height = 120)
 
-	watch =  tk.Label(window, text = "00:00:00", font="TimeNew 40 bold")
+	watch =  tk.Label(window, text = "00:00:00", font="TimeNew 35 bold")
 
 	btn_frame = tk.Frame(window)
 	for i,t in enumerate(tasks):
-		t.btn = tk.Button(btn_frame, text = t.name, 
-			command = lambda t=t: start(t.name), bg = t.color)
-		t.btn.grid(row = i//3, column = i%3, padx = 10)
-	stop_btn = tk.Button(btn_frame, text = "stop", command = stop, state = "disable")
-	stop_btn.grid(row = len(tasks)//6, column = 4, padx = 10)
+		t.btn = tk.Button(btn_frame, text = t.name, font = "TimeNew 11",
+			width = 8, command = lambda t=t: start(t.name))
+		t.btn.grid(row = i//3, column = i%3, padx = 10, pady = 5)
 
-	tasklogs = tk.Text(window, height = 15, width=50)
+	report_btn = tk.Button(window, text = "Statistic Summary", command = report)
+
+	btn_frame.pack()
+	watch.pack(pady = 20)
+	report_btn.pack()
+
+#report window
+	reportwindow = tk.Tk()
+	reportwindow.title("Statistic Summary")
+
+	reportwindow.minsize(width = 450, height = 300)
+
+	reportbtns = tk.Frame(reportwindow)
+	save_btn = tk.Button(reportbtns, text = 'save', width = 5, command = save)
+	save_btn.grid(row = 0, column = 0, padx = 5)
+
+	close_btn = tk.Button(reportbtns, text = 'close', command = close)
+	close_btn.grid(row = 0, column = 1, padx = 5)
+
+	tasklogs = tk.Text(reportwindow, height = 15, width=50)
 	tasklogs.insert(tk.END, "Tasks Logs\n")
-	tasklogs['state'] = 'disable'
-	save_btn = tk.Button(window, text = "save", command = save)
 
-	pie = tk.Canvas(window, height = 230, width = 260)
+	pie = tk.Canvas(reportwindow, height = 230, width = 260)
 	coord = 10, 20, 250, 210
 	oval = pie.create_oval(coord)
 	for t in tasks:
 		t.pieslice = pie.create_arc(coord, start = 0, extent = 0, 
 			fill = t.color, outline = t.color)
 
-	watch.pack()
-	btn_frame.pack()
-	tasklogs.pack(expand = True, fill = tk.BOTH, pady = 10)
-	save_btn.pack(side = tk.LEFT, padx = 15, pady = 10)
+	reportbtns.pack(side = tk.RIGHT, pady = 10, fill=tk.BOTH)
+	tasklogs.pack(expand = True, fill = tk.BOTH)
 	pie.pack()
+
+	reportwindow.withdraw()
 
 	window.mainloop()
