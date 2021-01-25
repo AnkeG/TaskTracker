@@ -9,7 +9,7 @@ totalspan = 0
 startstamp = 0
 runtask = None
 tasknames = ['work', 'study', 'relax', 'reading', 'custom1', 'custom2']
-taskcolors = ['red', 'blue', 'green', 'yellow', 'brown', 'purple']
+taskcolors = ['red', 'blue', 'green', 'orange', 'brown', 'purple']
 
 def updatewatch():
 	now = time.time()
@@ -50,7 +50,7 @@ def stop():
 	tstamp = time.time()
 	endtime = time.strftime("%m/%d/%y %H:%M", time.localtime(tstamp))
 	tspan = tstamp-startstamp
-	span = time.strftime("%H:%M", time.gmtime(tspan))
+	span = time.strftime("%H:%M:%S", time.gmtime(tspan))
 	totalspan += tspan
 
 	tasklogs['state'] = 'normal'
@@ -119,36 +119,39 @@ if __name__ == '__main__':
 	reportwindow = tk.Tk()
 	reportwindow.title("Statistic Summary")
 
-	reportwindow.minsize(width = 450, height = 300)
+	reportwindow.minsize(width = 450, height = 250)
 
-	reportbtns = tk.Frame(reportwindow)
+	reporttitle = tk.Frame(reportwindow)
+	reportbtns = tk.Frame(reporttitle)
+	reportlabel = tk.Label(reporttitle, text = 'Summary', font = 'Calibri 15 bold')
 	save_btn = tk.Button(reportbtns, text = 'save', width = 5, command = save)
 	save_btn.grid(row = 0, column = 0, padx = 5)
-
 	close_btn = tk.Button(reportbtns, text = 'close', command = close)
 	close_btn.grid(row = 0, column = 1, padx = 5)
+	reportlabel.pack(side = tk.LEFT)
+	reportbtns.pack(side = tk.RIGHT)
 
 	tasklogs = tk.Text(reportwindow, height = 15, width=50)
-	tasklogs.insert(tk.END, "Tasks Logs\n")
+	#tasklogs.insert(tk.END, "Tasks Logs\n")
 
 	pielabels = tk.Frame(reportwindow)
-	pie = tk.Canvas(reportwindow, height = 230, width = 260)
-	coord = 10, 20, 250, 210
+	pie = tk.Canvas(reportwindow, height = 230, width = 250)
+	coord = 10, 20, 210, 210
 	oval = pie.create_oval(coord)
 	for i,t in enumerate(tasks):
 		t.pieslice = pie.create_arc(coord, start = 0, extent = 0, 
-			fill = t.color, outline = t.color)
+			fill = t.color, outline = 'white')
 		label = tk.Label(pielabels, text = t.name, 
 			font = "Calibri 13 bold", fg = t.color)
-		label.grid(row = i, column = 0, padx = 5, pady = 3)
+		label.grid(row = i, column = 0, padx = 5, pady = 3, sticky = 'W')
 		t.percent = tk.Label(pielabels, text = '0%', 
 			font = "Calibri 13 bold", fg = t.color)
 		t.percent.grid(row = i, column = 1, padx = 5, pady = 3)
 
-	reportbtns.pack(side = tk.RIGHT, pady = 10, fill=tk.BOTH)
+	reporttitle.pack(pady = 10, fill = tk.X)
 	tasklogs.pack(expand = True, fill = tk.BOTH)
-	pie.pack(side = tk.LEFT)
-	pielabels.pack()
+	pielabels.pack(side = tk.LEFT, padx = 40)
+	pie.pack(side = tk.RIGHT)
 
 	reportwindow.withdraw()
 

@@ -5,7 +5,7 @@ import re
 
 fieldnames = ['tasks', 'start', 'end', 'span']
 
-row_pattern = r'(\w+):\s(\d\d/\d\d/\d\d\s\d\d:\d\d)\s~\s(\d\d/\d\d/\d\d\s\d\d:\d\d)\s\s(\d\d:\d\d)'
+row_pattern = r'(\w+):\s(\d\d/\d\d/\d\d\s\d\d:\d\d)\s~\s(\d\d/\d\d/\d\d\s\d\d:\d\d)\s\s(\d\d:\d\d:\d\d)'
 
 def initlogs(fname):
 	if not os.path.exists(fname):
@@ -23,7 +23,7 @@ def savelogs(fname, text):
 			start = match.group(2)
 			end = match.group(3)
 			span = match.group(4)
-			writer.writerow({'tasks': task, 'start': start, 'end':end, 'span':span})
+			writer.writerow({'Tasks': task, 'Start': start, 'End':end, 'Span':span})
 
 if __name__ == '__main__':
 	fname = 'logs.csv'
